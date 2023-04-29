@@ -1,10 +1,14 @@
 <template>
-  <router-view/>
+  <div>order</div>
+
 </template>
 
 <script>
 export default {
-  name: 'App'
+  name: "MyOrder"
 }
 </script>
 
+<style scoped>
+
+</style>
