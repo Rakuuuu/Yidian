@@ -25,6 +25,18 @@ const router = createRouter({
         {
             path: '/store',
             component: () => import('@/pages/store/StoreInfo'),
+        },
+        {
+            path: '/createorder',
+            component: () => import('@/pages/createOrder/createOrder'),
+        },
+        {
+            path: '/address',
+            component: () => import('@/pages/address/Address'),
+        },
+        {
+            path: '/addressEdit',
+            component: () => import('@/pages/addressEdit/addressEdit'),
         }
     ],
 });

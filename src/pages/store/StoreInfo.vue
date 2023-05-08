@@ -1,7 +1,7 @@
 <template>
   <div class="store-detail">
     <my-header :title="title"/>
-    <div class="content">
+    <div class="store-content">
       <div class="img"/>
       <div class="food-classify">
         <div class="name">
@@ -10,10 +10,24 @@
         </div>
         <div class="classify">
           <van-tabs>
-            <van-tab title="标签 1">内容 1</van-tab>
+            <van-tab
+                v-for="(item, index) in storeData"
+                :key="index"
+                :title="item.name"
+
+            >
+              <FoodList :index="index" :foodData="item.data"/>
+            </van-tab>
           </van-tabs>
         </div>
       </div>
+
+      <van-action-bar>
+        <van-action-bar-icon icon="chat-o" text="客服" />
+        <van-action-bar-icon icon="cart-o" text="购物车" :badge="store.getters['cart/getCartList'].length" @click="handleToCart"/>
+        <van-action-bar-button type="warning" text="加入购物车"  @click="handleAddToCart(false)"/>
+        <van-action-bar-button type="danger" text="立即购买" @click="handleBuy"/>
+      </van-action-bar>
     </div>
   </div>
 </template>
@@ -21,9 +35,13 @@
 <script>
 import MyHeader from "@/components/Header";
 import {reactive, toRefs} from "vue";
+import FoodList from "@/pages/store/components/FoodList";
+import store from "@/store";
+import router from "@/router";
+import {showFailToast, showSuccessToast} from "vant";
 export default {
   name: "store-info",
-  components: {MyHeader},
+  components: {FoodList, MyHeader},
   setup(){
     let data = reactive({
       title:'店铺名称',
@@ -105,14 +123,56 @@ export default {
       ],
     })
 
+    //加入购物车
+    const handleAddToCart = (buy) => {
+      let newList = []
+      data.storeData[0].data.items.forEach((v)=>{
+        v.children.forEach((item)=>{
+          if (item.num) {
+            newList.push(item)
+            item.add = true
+            item.num = 0
+            console.log(newList)
+          }
+        })
+      })
+      if (newList.length === 0) {
+        showFailToast('选中商品为空')
+        return
+      } else {
+        if(!buy)
+          showSuccessToast('加入购物车成功')
+      }
+      store.commit('cart/addToCart', newList)
+      console.log('cartList',store.getters['cart/getCartList'])
+    }
+
+    // 立即购买
+    const handleBuy = () =>{
+      handleAddToCart(true)
+    }
+
+    const handleToCart = () => {
+      router.push('/cart')
+    }
+
     return{
-      ...toRefs(data)
+      ...toRefs(data),
+      store,
+      handleAddToCart,
+      handleBuy,
+      handleToCart
     }
   }
 }
 </script>
 
 <style lang='less' scoped>
+/deep/.van-tabs{
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
 /deep/.van-tabs__line{
   background: #fcae21;
   border: 1px solid #fcae21;
@@ -122,26 +182,64 @@ export default {
   color: #fcae21;
 }
 
+/deep/.van-tree-select{
+  margin-top: 24px;
+}
+
+/deep/.van-sidebar-item--select:before{
+  background: #fcae21;
+  border-radius: 4px;
+}
+
+/deep/.van-tabs__content{
+  display: flex !important;
+  flex-grow: 1 !important;
+}
+/deep/.van-tab__panel{
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/deep/.van-tab__panel>div{
+  flex-grow: 1;
+}
+
+/deep/.van-action-bar{
+  height: 60px !important;
+  width: 100% !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+}
+
 .store-detail {
   height: 100%;
   display: flex;
   flex-flow: column;
-  .content {
+  .store-content {
     flex: 1;
+    flex-shrink: 0;
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     .img {
       background: url("../../assets/yuna.jpg") no-repeat center/cover;
       width: 100%;
       height: 150px;
     }
     .food-classify {
-      height: 500px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
       background-color: #fff;
       margin-top: -30px;
       border-radius: 20px 20px 0 0;
 
       .classify {
         margin-top: 10px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
       }
       .name {
         display: flex;

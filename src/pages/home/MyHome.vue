@@ -58,7 +58,7 @@
 <script>
 import MyFooter from "@/components/Footer";
 import {reactive, toRefs} from "vue";
-import StoreList from "@/components/Stores";
+import StoreList from "@/components/StoreList";
 
 export default {
   name: "MyHome",
